@@ -285,7 +285,6 @@ export class UserAuthController {
   async userLogin(@Body() data: LoginDTO, @Res() res: Response): Promise<any> {
     try {
       const tokens = await this.authService.login(data);
-      console.log(tokens);
       return Responser({
         statusCode: 200,
         message: 'User account logged in successfully',

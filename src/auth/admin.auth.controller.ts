@@ -102,7 +102,6 @@ export class AdminAuthController {
   ): Promise<any> {
     try {
       const tokens = await this.authService.adminLogin(data);
-      console.log(tokens);
       return Responser({
         statusCode: 200,
         message: 'Admin account logged in successfully',
