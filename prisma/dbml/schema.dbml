@@ -1,0 +1,124 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table User {
+  user_id String [pk]
+  name String [not null]
+  email String [unique, not null]
+  password String [not null]
+  otp String
+  token String
+  refresh_token String
+  updated_by_id String
+  updated_by Admin
+  user_type UserType [not null, default: 'NORMAL']
+  status UserStatus [not null, default: 'NOT_VERIFY']
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  reported_post Report [not null]
+  post Post [not null]
+  deleted_post Post [not null]
+  updated_post Post [not null]
+}
+
+Table Admin {
+  login_id String [pk]
+  name String [unique, not null]
+  password String [not null]
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  created_category Category [not null]
+  updated_category Category [not null]
+  deleted_category Category [not null]
+  deleted_user User [not null]
+  deleted_post Post [not null]
+}
+
+Table Category {
+  category_id String [pk]
+  name String [unique, not null]
+  created_by_id String [not null]
+  created_by Admin [not null]
+  updated_by_id String
+  updated_by Admin
+  deleted_by_id String
+  deleted_by Admin
+  status Status [not null, default: 'ACTIVE']
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+}
+
+Table Post {
+  post_id String [pk]
+  title String [not null]
+  content String [not null]
+  created_by_id String [not null]
+  created_by User [not null]
+  deleted_by_id String
+  deleted_by User
+  updated_by_id String
+  updated_by User
+  deleted_by_admin_id String
+  deleted_by_admin Admin
+  status PostStatus [not null, default: 'DRAFT']
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+  report Report [not null]
+}
+
+Table Report {
+  report_id String [pk]
+  subject String [not null]
+  report_post_id String [not null]
+  post Post [not null]
+  reported_by_id String [not null]
+  reported_by User [not null]
+  status Status [not null, default: 'ACTIVE']
+  created_at DateTime [default: `now()`, not null]
+  updated_at DateTime [not null]
+}
+
+Enum UserType {
+  NORMAL
+  PREMIUM
+}
+
+Enum UserStatus {
+  NOT_VERIFY
+  VERIFIED
+  SUSPENDED
+  DELETED
+}
+
+Enum Status {
+  ACTIVE
+  DELETED
+}
+
+Enum PostStatus {
+  DRAFT
+  PUBLISHED
+  REPORTED
+  DELETED
+}
+
+Ref: User.updated_by_id > Admin.login_id [delete: Cascade]
+
+Ref: Category.created_by_id > Admin.login_id [delete: Cascade]
+
+Ref: Category.updated_by_id > Admin.login_id [delete: Cascade]
+
+Ref: Category.deleted_by_id > Admin.login_id [delete: Cascade]
+
+Ref: Post.created_by_id > User.user_id [delete: Cascade]
+
+Ref: Post.deleted_by_id > User.user_id [delete: Cascade]
+
+Ref: Post.updated_by_id > User.user_id [delete: Cascade]
+
+Ref: Post.deleted_by_admin_id > Admin.login_id [delete: Cascade]
+
+Ref: Report.report_post_id > Post.post_id [delete: Cascade]
+
+Ref: Report.reported_by_id > User.user_id [delete: Cascade]

@@ -1,0 +1,122 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  user_id       String  @id @default(uuid()) @db.VarChar(45)
+  name          String
+  email         String  @unique
+  password      String  @db.VarChar(300)
+  otp           String?
+  token         String?
+  refresh_token String?
+  updated_by_id String?
+  updated_by    Admin?  @relation(fields: [updated_by_id], references: [login_id], onDelete: Cascade, onUpdate: Cascade)
+
+  user_type UserType   @default(NORMAL)
+  status    UserStatus @default(NOT_VERIFY)
+
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+  reported_post Report[]
+  post          Post[]   @relation("created")
+  deleted_post  Post[]   @relation("deleted")
+  updated_post  Post[]   @relation("updated")
+}
+
+model Admin {
+  login_id String @id @db.VarChar(45)
+  name     String @unique
+  password String @db.VarChar(300)
+
+  created_at       DateTime   @default(now())
+  updated_at       DateTime   @updatedAt
+  created_category Category[] @relation("created")
+  updated_category Category[] @relation("updated")
+  deleted_category Category[] @relation("deleted")
+  deleted_user     User[]
+  deleted_post     Post[]
+}
+
+model Category {
+  category_id   String  @id @default(uuid()) @db.VarChar(45)
+  name          String  @unique
+  created_by_id String
+  created_by    Admin   @relation("created", fields: [created_by_id], references: [login_id], onDelete: Cascade, onUpdate: Cascade)
+  updated_by_id String?
+  updated_by    Admin?  @relation("updated", fields: [updated_by_id], references: [login_id], onDelete: Cascade, onUpdate: Cascade)
+  deleted_by_id String?
+  deleted_by    Admin?  @relation("deleted", fields: [deleted_by_id], references: [login_id], onDelete: Cascade, onUpdate: Cascade)
+  status        Status  @default(ACTIVE)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Post {
+  post_id             String     @id @default(uuid()) @db.VarChar(45)
+  title               String
+  content             String     @db.LongText
+  created_by_id       String
+  created_by          User       @relation("created", fields: [created_by_id], references: [user_id], onDelete: Cascade, onUpdate: Cascade)
+  deleted_by_id       String?
+  deleted_by          User?      @relation("deleted", fields: [deleted_by_id], references: [user_id], onDelete: Cascade, onUpdate: Cascade)
+  updated_by_id       String?
+  updated_by          User?      @relation("updated", fields: [updated_by_id], references: [user_id], onDelete: Cascade, onUpdate: Cascade)
+  deleted_by_admin_id String?
+  deleted_by_admin    Admin?     @relation(fields: [deleted_by_admin_id], references: [login_id], onDelete: Cascade, onUpdate: Cascade)
+  status              PostStatus @default(DRAFT)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  report     Report[]
+}
+
+model Report {
+  report_id      String @id @default(uuid()) @db.VarChar(45)
+  subject        String
+  report_post_id String
+  post           Post   @relation(fields: [report_post_id], references: [post_id], onDelete: Cascade, onUpdate: Cascade)
+  reported_by_id String
+  reported_by    User   @relation(fields: [reported_by_id], references: [user_id], onDelete: Cascade, onUpdate: Cascade)
+  status         Status @default(ACTIVE)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+enum UserType {
+  NORMAL
+  PREMIUM
+}
+
+enum UserStatus {
+  NOT_VERIFY
+  VERIFIED
+  SUSPENDED
+  DELETED
+}
+
+enum Status {
+  ACTIVE
+  DELETED
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  REPORTED
+  DELETED
+}
