@@ -41,7 +41,7 @@ export class AdminAuthController {
     @Res() res: Response,
   ): Promise<any> {
     try {
-      const adminData = await this.authService.validateMe(req.admin.login_id);
+      const adminData = await this.authService.adminMe(req.admin.login_id);
       Responser({
         statusCode: 200,
         message: 'Admin info fetched successfully',

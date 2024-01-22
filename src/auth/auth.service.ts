@@ -574,6 +574,31 @@ export class AuthService {
   }
 
   // * ----------------------------------------- Admin Handlers --------------------------------------------------
+
+  async adminMe(id: string) {
+    const adminData = await this.prismaService.admin.findFirst({
+      where: {
+        login_id: id,
+      },
+      select: {
+        login_id: true,
+        name: true,
+        created_at: true,
+      },
+    });
+
+    return adminData;
+    try {
+    } catch (err) {
+      throw new Error(
+        JSON.stringify({
+          message: 'Admin not found',
+          status: 404,
+        }),
+      );
+    }
+  }
+
   async adminLogin(data: AdminLoginDTO) {
     const admin = await this.prismaService.admin.findFirst({
       where: {
